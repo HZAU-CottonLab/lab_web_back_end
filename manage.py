@@ -1,9 +1,18 @@
+'''
+Descripttion: 
+version: 
+Author: zpliu
+Date: 2022-06-14 21:27:06
+LastEditors: zpliu
+LastEditTime: 2022-06-14 21:27:07
+@param: 
+'''
 #!/usr/bin/env python
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
 
-
+#django version 3.2.8
 def main():
     """Run administrative tasks."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'lab_web_back_end.settings')

@@ -4,7 +4,7 @@ version:
 Author: zpliu
 Date: 2021-10-17 20:35:47
 LastEditors: zpliu
-LastEditTime: 2021-10-19 16:33:49
+LastEditTime: 2022-06-16 20:24:41
 @param: 
 '''
 """lab_web_back_end URL Configuration
@@ -25,10 +25,9 @@ Including another URLconf
 from django.conf.urls import include
 from django.contrib import admin
 from django.urls import path
-import lab_api.urls as api_urls
-import lab_admin.urls as lab_admin_urls
+import apps.users.urls as user
+import apps.lab_admin.urls as lab_admin_urls
 
 urlpatterns = [
-    path('api/', include(api_urls)),
-    path('admin/', include(lab_admin_urls)),
+    path('user/', include(user),name='userAPI'),
 ]

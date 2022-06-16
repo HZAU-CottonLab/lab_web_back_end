@@ -11,9 +11,11 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
-
+import sys
+import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
 
 
 # Quick-start development settings - unsuitable for production
@@ -31,15 +33,17 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
+    # 'django.contrib.admin',
     'corsheaders',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'lab_admin', #后台数据
-    'lab_api',  #后端API接口
+    'lab_api',  # 后端API接口
+    'lab_admin',
+    'users',
+    # 'test_user'
 ]
 
 MIDDLEWARE = [
@@ -54,7 +58,7 @@ MIDDLEWARE = [
 ]
 
 
-#! 路由路口文件 
+#! 路由路口文件
 
 ROOT_URLCONF = 'lab_web_back_end.urls'
 
@@ -133,3 +137,7 @@ STATIC_ROOT = Path.joinpath(BASE_DIR, 'static/')
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# * 替换auth中的user model
+AUTH_USER_MODEL = 'users.User'
+# AUTH_USER_MODEL = 'test_user.CustomUser'
