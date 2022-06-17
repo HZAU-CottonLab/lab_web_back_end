@@ -4,7 +4,7 @@ version:
 Author: zpliu
 Date: 2022-06-16 16:34:41
 LastEditors: zpliu
-LastEditTime: 2022-06-16 22:09:26
+LastEditTime: 2022-06-17 21:49:41
 @param: 
 '''
 
@@ -43,9 +43,12 @@ class User(AbstractBaseUser,PermissionsMixin):
     is_active = models.BooleanField(default=True)
     #* unique validate field
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ['name']
     
     objects = CustomUserManager()
 
     def __str__(self) -> str:
         return self.email
+    @property
+    def check_is_superuser(self):
+        return self.is_superuser

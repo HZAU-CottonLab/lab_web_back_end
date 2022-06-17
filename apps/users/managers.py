@@ -4,10 +4,13 @@ version:
 Author: zpliu
 Date: 2022-06-14 20:54:39
 LastEditors: zpliu
-LastEditTime: 2022-06-16 21:28:21
+LastEditTime: 2022-06-17 22:12:19
 @param: 
 '''
 from django.contrib.auth.base_user import BaseUserManager
+
+
+
 
 
 class CustomUserManager(BaseUserManager):
@@ -28,3 +31,20 @@ class CustomUserManager(BaseUserManager):
         user.set_password(password)
         user.save()
         return user
+
+    def create_superuser(self, email,name, password, **extra_fields):
+        """
+        Create and save a SuperUser with the given email and password.
+        """
+        extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('is_active', True)
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('Superuser must have is_superuser=True.')
+        return self.create_user(email, password, name,**extra_fields)
+    
+    def update_personInfo(self,email,password,**extra_fields):
+        '''
+        update personInfo
+        '''
+        pass 
+    
