@@ -4,11 +4,12 @@ version:
 Author: zpliu
 Date: 2022-06-14 20:54:39
 LastEditors: zpliu
-LastEditTime: 2022-06-17 22:12:19
+LastEditTime: 2022-06-20 16:30:22
 @param: 
 '''
 from django.contrib.auth.base_user import BaseUserManager
 
+from django.db import models
 
 
 
@@ -42,9 +43,6 @@ class CustomUserManager(BaseUserManager):
             raise ValueError('Superuser must have is_superuser=True.')
         return self.create_user(email, password, name,**extra_fields)
     
-    def update_personInfo(self,email,password,**extra_fields):
-        '''
-        update personInfo
-        '''
-        pass 
-    
+
+class user_picture_relationship_Manager(models.Manager):
+    pass    

@@ -4,17 +4,19 @@ version:
 Author: zpliu
 Date: 2022-03-24 21:37:33
 LastEditors: zpliu
-LastEditTime: 2022-06-17 22:26:14
+LastEditTime: 2022-06-23 22:51:41
 @param: 
 '''
-import email
+import os
+from django.conf import settings
 from django.shortcuts import HttpResponse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth import get_user_model
-from django.contrib.auth.decorators import login_required
 import json
 from .decorators import check_login, check_superuser
 from datetime import datetime, timedelta
+from picture.models import customer_picture
+from users.models import UserPicture
 
 
 def user_login(request):
@@ -22,32 +24,43 @@ def user_login(request):
     #? authenticate successful return code 0 and person info
     #? authenticate failed return 1003
     '''
-    email = request.POST['email']
-    password = request.POST['password']
-    user = authenticate(request, username=email, password=password)
-    if user is not None:
-        # * login and set session
-        login(request, user)
-        # * set session
-        request.session['IS_LOGIN'] = True
-        request.session['IS_SUPERUSER'] = user.check_is_superuser
-        # Redirect to a success page.
-        response = HttpResponse(json.dumps({
-            "code": 0
-        }))
-        #* setcookie with different roles
-        if user.check_is_superuser:
-            response.set_cookie(
-                'role', 'admin', expires=datetime.now()+timedelta(days=14))
+    # print(request.__dict__)
+    if request.method == 'POST':
+        email = request.POST['email']
+        password = request.POST['password']
+        print(email, password)
+        user = authenticate(request, username=email, password=password)
+        if user is not None:
+            # * login and set session
+            login(request, user)
+            # * set session
+            request.session['IS_LOGIN'] = True
+            request.session['IS_SUPERUSER'] = user.check_is_superuser
+            # Redirect to a success page.
+            response = HttpResponse(json.dumps({
+                "errno": 0,
+                "accessToken": 111111111111,
+                "info": {
+                    "username": user.name,
+                    "id": user.id,
+                    "loginStatus": True,
+                }
+
+            }))
+            # * setcookie with different roles
+            # if user.check_is_superuser:
+            #     response.set_cookie(
+            #         'role', 'admin', expires=datetime.now()+timedelta(days=14))
+            # else:
+            #     response.set_cookie(
+            #         'role', 'editor', expires=datetime.now()+timedelta(days=14))
+            return response
         else:
-            response.set_cookie(
-                'role', 'editor', expires=datetime.now()+timedelta(days=14))
-        return response
-    else:
-        # Return an 'invalid login' error message.
-        return HttpResponse(json.dumps({
-            "code": 1003
-        }))
+            # Return an 'invalid login' error message.
+            return HttpResponse(json.dumps({
+                "errno": 1003,
+                "message": "账号或密码错误"
+            }))
 
 
 def user_add(request):
@@ -67,7 +80,8 @@ def user_add(request):
     if password != repeat_password:
         return HttpResponse(
             json.dumps({
-                'code': 1000
+                'errno': 1000,
+                'message': "两次密码输入不一致"
             })
         )
     if name and email and password and repeat_password:
@@ -75,7 +89,8 @@ def user_add(request):
         if User.objects.filter(email=email):
             return HttpResponse(
                 json.dumps({
-                    'code': 1002
+                    'errno': 1002,
+                    'message': "账号已经注册"
                 })
             )
         else:
@@ -83,12 +98,13 @@ def user_add(request):
                 name=name, password=password, email=email)
             new_user.save()
             return HttpResponse(json.dumps({
-                'code': 0,
+                'errno': 0,
             }))
     else:
         # * something empty
         return HttpResponse(json.dumps({
-            'code': 1001
+            'errno': 1001,
+            'message': "缺少必填项"
         }))
 
 
@@ -98,31 +114,22 @@ def update_password(request):
     '''
     User = get_user_model()
     userid = request.POST['id']
-    password=request.POST['password']
-    repeatpassword=request.POST['repeatpassword']
-    if password!=repeatpassword:
+    password = request.POST['password']
+    repeatpassword = request.POST['repeatpassword']
+    if password != repeatpassword:
         # * password and repeatPassword don't match
         return HttpResponse(
             json.dumps({
-                'code': 1000
+                'errno': 1000,
+                'message': "两次密码输入不一致"
             })
         )
     else:
-        #* update password
-        user=User.objects.get(id=userid)
+        # * update password
+        user = User.objects.get(id=userid)
         user.set_password(password)
         user.save()
         return HttpResponse(json.dumps({'code': 0}))
-
-
-
-@check_login
-def user_info(request):
-    # * get userInfo by sessionID
-    User = get_user_model()
-    userInfo = User.objects.get(id=request.session.get('_auth_user_id'))
-    return HttpResponse(json.dumps({1: 11}))
-
 
 
 @check_superuser
@@ -138,11 +145,177 @@ def delet_user(request):
         return HttpResponse(json.dumps({1: 0}))
 
 
-def logout_user(request):
-    logout(request)
+@check_login
+def update_userInfo(request):
+    '''update User info
+    '''
+    User = get_user_model()
+    userId = request.POST.get("id", None)
+    userInfo = User.objects.filter(id=userId)
+    if not userInfo:
+        return HttpResponse(json.dumps(
+            {'errno': 1004,
+             "message": "用户不存在"
+             }))
+    else:
+        # * update partion fields,
+        userInfo.update(
+            name=request.POST.get("name", None),
+            sex=request.POST.get("sex", 0),
+            people_type=request.POST.get("peopleType", None),
+            contact=request.POST.get("contact", None),
+            office_site=request.POST.get("officeSite", None),
+            info_detail=request.POST.get("infoDetail", None),
+            recruit=request.POST.get("recruit", None),
+            teacher=request.POST.get("teacher", None),
+            jobTitle=request.POST.get("jobTitle", None),
+        )
+        return HttpResponse(
+            json.dumps(
+                {'errno': 0,
+                 "message": "数据已经保存"
+                 }
+            )
+        )
+    #  userInfo.save()
+
+
+# @check_login
+def image_upload(request):
+    if request.method == 'POST':
+        print(request.content_type)
+        # print(request.body)
+        Picture = request.FILES.get("image")
+        User = get_user_model()
+        # * upload the image file and save the picture in disk and update the model
+        PictureObject = customer_picture.objects.uploadImg(Picture)
+        userId = request.POST.get("id", None)
+        # *
+        userObject = User.objects.get(id=userId)
+        if not userObject:
+            return HttpResponse(json.dumps({'errno': 1004}))
+        else:
+            # * save the relationship
+            userObject.img_url.add(PictureObject)
+            # * save the relationshipr bettwwn picture and user
+            # TODO filter the image URL
+            return HttpResponse(json.dumps({
+                "errno": 0,
+                "data": {
+                    "url": userObject.avatar
+                }
+            }))
+
+
+@check_login
+def image_delete(request):
+    if request.method == 'POST':
+        User = get_user_model()
+        userId = request.POST.get("id", None)
+        userObject = User.objects.get(id=userId)
+        if not userObject:
+            return HttpResponse(json.dumps({'errno': 1004}))
+        else:
+            # * delete the relationship and remove from disk
+            for i in userObject.img_url.all():
+                i.delete()
+            return HttpResponse(json.dumps({
+                "errno": 0,
+
+            }))
+
+
+def user_is_checked(request):
+    '''
+    '''
+    pass
     return HttpResponse(json.dumps({1: 0}))
 
 
+@check_login
+def logout_user(request):
+    logout(request)
+    return HttpResponse(
+        json.dumps({
+            "errno": 0,
+            "message": ""
+        }))
 
-def update_userInfo(request):
-    return  HttpResponse(json.dumps({1: 0}))
+
+@check_login
+def get_user_roles(request):
+    User = get_user_model()
+    userId = request.session['_auth_user_id']
+    # * use session to login
+    userObject = User.objects.get(id=userId)
+    if userObject.check_is_superuser:
+        return HttpResponse(json.dumps({
+            "errno": 0,
+            "roles": ['admin'],
+            'message': ''
+        }))
+    else:
+        return HttpResponse(json.dumps({
+            "errno": 0,
+            "roles": ['editor'],
+            'message': ''
+        }))
+
+# -----------------------------------------------------
+# don't required authenticate
+# -----------------------------------------------------
+
+
+def user_info(request):
+    # * get user information by userID
+    User = get_user_model()
+    userid = request.POST['id']
+    userInfo = User.objects.get(id=userid)
+    if not userInfo:
+        # * no such User
+        return HttpResponse(json.dumps({'errno': 1004}))
+    else:
+        # * the first picture of the person
+
+        return HttpResponse(json.dumps(
+            {
+                'errno': 0,
+                'info': {
+                    'basic': {
+                        "id":userInfo.id,
+                        "name": userInfo.name,
+                        "imgURL": userInfo.avatar,
+                        "sex": userInfo.sex,
+                        "peopleType": userInfo.people_type,
+                        "jobTitle": userInfo.jobTitle,
+                        "contact": userInfo.contact,
+                        "officeSite": userInfo.office_site,
+                        "teacher": userInfo.teacher,
+                    },
+                    'infoDetail': json.loads(userInfo.info_detail),
+                }
+            }
+        ))
+
+
+def show_teachers(request):
+    # * 查找所有为teacher的项
+    User = get_user_model()
+    teacherObjects = User.objects.filter(people_type__exact=0)
+    teacherList = []
+    for teacher in teacherObjects:
+        teacherList.append({
+            'id': teacher.id,
+            'name': teacher.name,
+            'imageURL': teacher.avatar
+
+        })
+    return HttpResponse(json.dumps({
+        'errno': 0,
+        "data": teacherList
+    }))
+
+
+# def show_team(request):
+#     # TODO some thing need to do
+#     return HttpResponse(json.dumps({'errno': 1004}))

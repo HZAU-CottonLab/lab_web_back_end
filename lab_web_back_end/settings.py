@@ -43,7 +43,10 @@ INSTALLED_APPS = [
     'lab_api',  # 后端API接口
     'lab_admin',
     'users',
-    # 'test_user'
+    'picture', #图片资源文件
+    'news', #新闻组件
+    'publication', #publication组件
+    'research' #research 组件
 ]
 
 MIDDLEWARE = [
@@ -140,4 +143,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # * 替换auth中的user model
 AUTH_USER_MODEL = 'users.User'
-# AUTH_USER_MODEL = 'test_user.CustomUser'
+# AUTH_USER_MODEL = 'test_user.CustomUser' 
+
+#* 配置图片上传路径
+MEDIA_URL = '/img/'
+MEDIA_ROOT = os.path.join(BASE_DIR, "img/")
+WEB_URL="http://127.0.0.1:8000/img/"
+
+
