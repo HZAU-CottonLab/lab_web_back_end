@@ -4,7 +4,7 @@ version:
 Author: zpliu
 Date: 2022-06-16 22:28:41
 LastEditors: zpliu
-LastEditTime: 2022-06-25 22:25:07
+LastEditTime: 2022-07-01 17:05:17
 @param: 
 '''
 from pyexpat import model
@@ -20,7 +20,7 @@ class ResearchManger(models.Manager):
             title=title,
             description=description,
             date=date,
-            check=True
+            is_check=True
         )
         researchObject.save()
         #* save the relationship
@@ -34,7 +34,7 @@ class Research(models.Model):
     imageURL=models.ManyToManyField(
         customer_picture,through='research_picture',through_fields=['research','img']
     )
-    check=models.BooleanField(default=True,blank=False)
+    is_check=models.BooleanField(default=True,blank=False)
     objects=ResearchManger()
     @property
     def data(self):
@@ -45,7 +45,7 @@ class Research(models.Model):
                 "title":self.title,
                 "description":self.description,
                 "date":datetime.strftime(self.date,'%Y-%m-%d'),
-                "check":self.check,
+                "check":self.is_check,
                 "imageURL":avatarObject.url,
             }
 

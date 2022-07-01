@@ -1,9 +1,11 @@
+
 from django.shortcuts import HttpResponse
 # Create your views here.
 import json
 from django.conf import settings
 from picture.models import customer_picture
 from news.models import News
+from django.db.models import Q
 booleanDict = {
     'true': 1,
     'false': 0
@@ -73,7 +75,7 @@ def news_update(request):
             vhtml=request.POST.get("vhtml", None),
             date=request.POST.get("date", None),
             latest=booleanDict.get(request.POST.get("latest", 'false')),
-            check=booleanDict.get(request.POST.get("check", 'false'))
+            is_check=booleanDict.get(request.POST.get("check", 'false'))
         )
         if existedImg != imgURL:
             # * 修改relationship，并删除原有的PictureObject
@@ -157,14 +159,13 @@ def del_news_by_Id(request):
 def news_checked(request):
     newsId = request.POST.get("id", None)
     check=request.POST.get("check", None)
-    print(request.POST)
     try:
         newsInstance = News.objects.get(id=newsId)
-        newsInstance.check=booleanDict.get(check,0)
+        newsInstance.is_check=booleanDict.get(check,0)
         newsInstance.save()
         return HttpResponse(json.dumps({
                 'errno': 0,
-                "message": "新闻审核状态"
+                "message": "审核状态已改变"
             }))
     except News.DoesNotExist:
         return HttpResponse(
@@ -172,4 +173,43 @@ def news_checked(request):
                 'errno': 1007,
                 "message": "新闻不存在!"
             })) 
+
+def carousel_list(request):
+    newsList=News.objects.filter(Q(latest=True) & Q(is_check=True))
+    if newsList:
+        carouselList=[i.data for i in newsList]
+        return HttpResponse(
+                json.dumps({
+                    'errno': 0,
+                    "message": "查询Carousel列表",
+                    "data":carouselList
+
+                }))  
+    else:
+        return HttpResponse(
+                json.dumps({
+                    'errno': 1007,
+                    "message": "新闻不存在!"
+                })) 
+
+
+def latest_news(request):
+    newsList=News.objects.filter(
+        Q(latest=False) &Q(is_check=True)
+    )
+    if newsList:
+        latestList=[i.data for i in newsList[0:3]]
+        return HttpResponse(
+                json.dumps({
+                    'errno': 0,
+                    "message": "查询latest列表",
+                    "data":latestList
+
+                }))  
+    else:
+        return HttpResponse(
+                json.dumps({
+                    'errno': 1007,
+                    "message": "新闻不存在!"
+                })) 
 

@@ -4,7 +4,7 @@ version:
 Author: zpliu
 Date: 2022-06-24 09:21:40
 LastEditors: zpliu
-LastEditTime: 2022-06-24 15:06:50
+LastEditTime: 2022-07-01 17:02:41
 @param: 
 '''
 
@@ -22,7 +22,7 @@ class userManger(models.Manager):
             vhtml=vhtml,
             date=date,
             latest=latest,
-            check=check
+            is_check=check
         )
         newsObject.save()
         #* add picture relationship
@@ -35,7 +35,7 @@ class News(models.Model):
     vhtml = models.TextField(blank=False, null=NULL,default="<p></p>")
     date = models.DateField()
     latest = models.BooleanField(default=False, blank=False)
-    check = models.BooleanField(default=True, blank=False)
+    is_check = models.BooleanField(default=True, blank=False)
     imageURL = models.ManyToManyField(
         customer_picture, through='newPicture', through_fields=('news', 'img'))
     objects=userManger()
@@ -50,7 +50,7 @@ class News(models.Model):
                 "description":self.description,
                 "vhtml":self.vhtml,
                 "date":datetime.strftime(self.date,'%Y-%m-%d'),
-                "check":self.check,
+                "check":self.is_check,
                 "imageURL":avatarObject.url,
                 "latest":self.latest
             }
@@ -61,7 +61,7 @@ class News(models.Model):
                 "description":self.description,
                 "vhtml":self.vhtml,
                 "date":datetime.strftime(self.date,'%Y-%m-%d'),
-                "check":self.check,
+                "check":self.is_check,
                 "imageURL":'',
                 "latest":self.latest
             } 

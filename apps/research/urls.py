@@ -4,7 +4,7 @@ version:
 Author: zpliu
 Date: 2022-06-25 21:39:32
 LastEditors: zpliu
-LastEditTime: 2022-06-25 22:41:43
+LastEditTime: 2022-06-28 16:46:09
 @param: 
 '''
 from django.urls import path
@@ -14,4 +14,7 @@ urlpatterns = [
     path("info/",views.queryResearchById),
     path("update/",views.research_update),
     path("all/",views.get_all_researchItems),
+    path("delete/",views.researchItem_delete),
+    path("delete/",views.researchItem_delete),
+    path("check/",views.research_check),
 ]
