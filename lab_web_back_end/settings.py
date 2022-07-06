@@ -40,8 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'lab_api',  # 后端API接口
-    'lab_admin',
+    # 'lab_api',  # 后端API接口
+    # 'lab_admin',
     'users',
     'picture', #图片资源文件
     'news', #新闻组件

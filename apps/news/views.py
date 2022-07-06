@@ -6,12 +6,16 @@ from django.conf import settings
 from picture.models import customer_picture
 from news.models import News
 from django.db.models import Q
+from users.decorators import check_login,check_superuser
+
+
 booleanDict = {
     'true': 1,
     'false': 0
 }
 
-
+@check_login
+@check_superuser
 def news_add(request):
     title = request.POST.get("title", None)
     description = request.POST.get("description", None)
@@ -53,7 +57,8 @@ def news_add(request):
             })
         )
 
-
+@check_login
+@check_superuser
 def news_update(request):
     # * 检测当前的avatar是否与已有的avatar一致；
     # * 如果不一致则删除原有的并更新image
@@ -119,7 +124,7 @@ def get_all_news(request):
 
 
 def get_news_byId(request):
-    newsObject = News.objects.filter(id=request.POST.get("id", None)).first()
+    newsObject = News.objects.filter(Q(id=request.POST.get("id", None))&Q(is_check=True)).first()
     if newsObject:
         return HttpResponse(
             json.dumps({
@@ -132,10 +137,11 @@ def get_news_byId(request):
         return HttpResponse(
             json.dumps({
                 'errno': 1007,
-                "message": "新闻不存在!"
+                "message": "请求的新闻不存在!"
             }))
 
-
+@check_login
+@check_superuser
 def del_news_by_Id(request):
     newsId = request.POST.get("id", None)
     try:
@@ -155,7 +161,8 @@ def del_news_by_Id(request):
                 'errno': 1007,
                 "message": "新闻不存在!"
             }))
-
+@check_login
+@check_superuser
 def news_checked(request):
     newsId = request.POST.get("id", None)
     check=request.POST.get("check", None)
@@ -194,6 +201,7 @@ def carousel_list(request):
 
 
 def latest_news(request):
+    #除去放在跑马灯中的新闻
     newsList=News.objects.filter(
         Q(latest=False) &Q(is_check=True)
     )

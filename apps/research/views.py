@@ -4,7 +4,7 @@ version:
 Author: zpliu
 Date: 2022-06-25 21:41:49
 LastEditors: zpliu
-LastEditTime: 2022-07-01 17:05:57
+LastEditTime: 2022-07-06 17:38:02
 @param: 
 '''
 from django.shortcuts import HttpResponse
@@ -12,13 +12,15 @@ import json
 from django.conf import settings
 from picture.models import customer_picture
 from research.models import Research
+from users.decorators import check_superuser,check_login
 # Create your views here.
 booleanDict = {
     'true': 1,
     'false': 0
 }
 
-
+@check_login
+@check_superuser
 def research_add(request):
     title = request.POST.get("title", None)
     description = request.POST.get("description", None)
@@ -49,7 +51,8 @@ def research_add(request):
             })
         )
 
-
+@check_login
+@check_superuser
 def research_update(request):
     researchId = request.POST.get('id', None)
     researchInstatnce = Research.objects.filter(id=researchId)
@@ -119,7 +122,8 @@ def get_all_researchItems(request):
             'content': content
         }))
 
-
+@check_login
+@check_superuser
 def researchItem_delete(request):
     researchId = request.POST.get("id", None)
     try:
@@ -140,7 +144,8 @@ def researchItem_delete(request):
                 "message": "Research不存在!"
             }))
 
-
+@check_login
+@check_superuser
 def research_check(request):
     researchId = request.POST.get("id", None)
     check = request.POST.get("check", None)

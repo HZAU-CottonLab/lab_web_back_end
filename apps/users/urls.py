@@ -4,7 +4,7 @@ version:
 Author: zpliu
 Date: 2022-06-16 20:22:42
 LastEditors: zpliu
-LastEditTime: 2022-06-23 21:30:44
+LastEditTime: 2022-07-06 15:51:23
 @param: 
 '''
 from django.urls import path
@@ -19,8 +19,8 @@ urlpatterns = [
     path('delete/',views.delet_user),
     path('logout/',views.logout_user),
     path('update/',views.update_userInfo),
-    path('icon/upload/',views.image_upload),
-    path('icon/delete/',views.image_delete),
+    # path('icon/upload/',views.image_upload),
+    # path('icon/delete/',views.image_delete),
     path('teachers/',views.show_teachers),
-    # path('teachers/',views.show_team),
+    path('team/',views.show_team),
 ]

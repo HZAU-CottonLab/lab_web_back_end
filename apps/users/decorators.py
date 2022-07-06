@@ -4,7 +4,7 @@ version:
 Author: zpliu
 Date: 2022-06-17 20:44:14
 LastEditors: zpliu
-LastEditTime: 2022-06-23 20:56:09
+LastEditTime: 2022-07-06 17:47:27
 @param: 
 '''
 
@@ -28,7 +28,7 @@ def check_login(fn):
             # * login required
             return HttpResponse(json.dumps({
                 "errno": 999,
-                "message":"抱歉，您无权限访问"
+                "message":"请先登录，再执行操作"
             }))
     return wrap
 
